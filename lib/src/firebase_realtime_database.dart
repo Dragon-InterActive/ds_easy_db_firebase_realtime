@@ -2,12 +2,43 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:ds_easy_db/ds_easy_db.dart';
 
+/// Firebase Realtime Database implementation of [DatabaseStreamRepository].
+///
+/// Provides real-time data synchronization with streaming support. Optimized
+/// for low-latency updates and live data across connected clients.
+///
+/// Features:
+/// - Real-time data synchronization
+/// - Low latency updates
+/// - Offline support with automatic sync
+/// - Reactive streams for live data
+/// - Cross-platform support
+///
+/// Firebase initialization:
+/// ```dart
+/// db.configure(
+///   stream: FirebaseRealtimeDatabase(
+///     options: DefaultFirebaseOptions.currentPlatform,
+///   ),
+///   // ...
+/// );
+/// ```
 class FirebaseRealtimeDatabase implements DatabaseStreamRepository {
+  /// Optional Firebase configuration options.
+  ///
+  /// If provided, Firebase will be automatically initialized in [init].
+  /// If null, Firebase must be initialized manually before using this database.
   final FirebaseOptions? options;
+
   FirebaseDatabase? _database;
 
+  /// Creates a new Firebase Realtime Database instance.
+  ///
+  /// [options] Optional Firebase configuration. If provided, Firebase will be
+  /// initialized automatically. Otherwise, ensure Firebase is initialized manually.
   FirebaseRealtimeDatabase({this.options});
 
+  /// Returns the Firebase Database instance.
   FirebaseDatabase get database {
     _database ??= FirebaseDatabase.instance;
     return _database!;

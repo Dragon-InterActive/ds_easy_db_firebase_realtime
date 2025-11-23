@@ -17,8 +17,8 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  ds_easy_db: ^1.0.0
-  ds_easy_db_firebase_realtime: ^1.0.0
+  ds_easy_db: ^1.0.1
+  ds_easy_db_firebase_realtime: ^1.0.1
   firebase_core: ^4.2.1  # Required for Firebase initialization
 ```
 

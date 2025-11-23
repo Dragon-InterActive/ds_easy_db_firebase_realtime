@@ -1,6 +1,6 @@
 name: ds_easy_db_firebase_realtime
 description: "Firebase Realtime Database implementation for DS-EasyDB. Provides real-time data synchronization with streaming support."
-version: 1.0.0
+version: 1.0.1
 homepage: https://github.com/Dragon-InterActive/ds_easy_db_firebase_realtime
 license: BSD-3-Clause
 
@@ -11,7 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  ds_easy_db: ^1.0.0
+  ds_easy_db: ^1.0.1
   firebase_core: ^4.2.1
   firebase_database: ^12.1.0
 
