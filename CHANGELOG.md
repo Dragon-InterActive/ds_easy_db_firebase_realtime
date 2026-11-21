@@ -1,5 +1,8 @@
 ## 1.1.0
 
+* The sync adapter stamps `updatedAt` with the server time on every push.
+  The delta pull depends on it, so it no longer relies on the app writing
+  the field with `serverTS`.
 * Fixed: collections whose keys are all integers (`"0"`, `"1"`, ...) arrive
   as a `List` from the backend and were reported as empty.
 * Nested values are returned as `Map<String, dynamic>` at every depth.

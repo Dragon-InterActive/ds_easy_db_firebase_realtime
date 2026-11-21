@@ -27,8 +27,9 @@ import 'realtime_sync_support.dart';
 /// { "rules": { "tasks": { ".indexOn": "updatedAt" } } }
 /// ```
 ///
-/// The field must be written with [DatabaseRepository.serverTS], so the
-/// backend assigns the value.
+/// The adapter sets the field to `ServerValue.timestamp` on every push, so
+/// the app does not have to write it. Children written past the adapter need
+/// the field as well, or delta pulls will not see them.
 ///
 /// A removed child cannot appear in any query, so
 /// [SyncCapabilities.supportsDeltaDeletes] is only true when [deletedField] is
@@ -175,7 +176,13 @@ class RealtimeSyncAdapter implements SyncRemoteAdapter {
           }
           continue;
         }
-        updates[path] = _resolveServerTimestamps(item.data!);
+        // The delta field is stamped on every write, whether or not the
+        // document carries it: a stale or missing value would hide this
+        // change from every other device's delta pull.
+        updates[path] = <String, Object?>{
+          ..._resolveServerTimestamps(item.data!),
+          updatedAtField: ServerValue.timestamp,
+        };
       }
 
       await _db.ref().update(updates);
