@@ -1,6 +1,6 @@
 name: ds_easy_db_firebase_realtime
 description: "Firebase Realtime Database implementation for DS-EasyDB. Provides real-time data synchronization with streaming support."
-version: 1.0.1
+version: 1.1.0
 homepage: https://github.com/Dragon-InterActive/ds_easy_db_firebase_realtime
 license: BSD-3-Clause
 
@@ -11,7 +11,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  ds_easy_db: ^1.0.1
+  ds_easy_db: ^1.1.0
+  ds_sync_contract: ^0.1.0
   firebase_core: ^4.2.1
   firebase_database: ^12.1.0
 
@@ -19,3 +20,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+
+# ds_sync_contract is developed alongside this package and is not published yet.
+dependency_overrides:
+  ds_sync_contract:
+    path: ../ds_sync_contract

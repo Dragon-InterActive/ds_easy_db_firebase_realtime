@@ -62,12 +62,7 @@ class FirebaseRealtimeDatabase implements DatabaseStreamRepository {
   Stream<Map<String, dynamic>?> watch(String collection, String id) {
     return database.ref(collection).child(id).onValue.map((event) {
       if (!event.snapshot.exists) return null;
-
-      final data = event.snapshot.value;
-      if (data is Map) {
-        return Map<String, dynamic>.from(data);
-      }
-      return null;
+      return _asDocument(event.snapshot.value);
     });
   }
 
@@ -75,15 +70,14 @@ class FirebaseRealtimeDatabase implements DatabaseStreamRepository {
   Stream<Map<String, dynamic>?> watchAll(String collection) {
     return database.ref(collection).onValue.map((event) {
       if (!event.snapshot.exists) return null;
-
-      final data = event.snapshot.value;
-      if (data is Map) {
-        return Map<String, dynamic>.from(data);
-      }
-      return null;
+      final children = _children(event.snapshot.value);
+      return children.isEmpty ? null : children;
     });
   }
 
+  /// Watches the documents matching [where], each with its key under `id`.
+  ///
+  /// A document that carries its own `id` field keeps it.
   @override
   Stream<List<Map<String, dynamic>>> watchQuery(
     String collection, {
@@ -92,33 +86,64 @@ class FirebaseRealtimeDatabase implements DatabaseStreamRepository {
     return database.ref(collection).onValue.map((event) {
       if (!event.snapshot.exists) return <Map<String, dynamic>>[];
 
-      final data = event.snapshot.value;
-      if (data is! Map) return <Map<String, dynamic>>[];
-
       final items = <Map<String, dynamic>>[];
-
-      data.forEach((key, value) {
-        if (value is Map) {
-          final item = Map<String, dynamic>.from(value);
-          item['id'] = key;
-
-          // Filtern
-          if (where.isEmpty) {
-            items.add(item);
-          } else {
-            bool matches = true;
-            for (var entry in where.entries) {
-              if (item[entry.key] != entry.value) {
-                matches = false;
-                break;
-              }
-            }
-            if (matches) items.add(item);
-          }
-        }
-      });
+      for (final entry in _children(event.snapshot.value).entries) {
+        final document = entry.value;
+        if (document is! Map<String, dynamic>) continue;
+        if (!_matches(document, where)) continue;
+        items.add(<String, dynamic>{'id': entry.key, ...document});
+      }
       return items;
     });
+  }
+
+  bool _matches(Map<String, dynamic> document, Map<String, dynamic> where) {
+    for (final entry in where.entries) {
+      if (document[entry.key] != entry.value) return false;
+    }
+    return true;
+  }
+
+  /// The children of a collection node, keyed by their key.
+  ///
+  /// The Realtime Database turns a node whose keys are all small integers
+  /// (`"0"`, `"1"`, ...) into a `List` — with `null` holes for missing keys —
+  /// instead of a `Map`. Both shapes are accepted here.
+  static Map<String, dynamic> _children(Object? value) {
+    if (value is Map) {
+      return <String, dynamic>{
+        for (final entry in value.entries)
+          if (entry.value != null)
+            entry.key.toString(): _normalize(entry.value),
+      };
+    }
+    if (value is List) {
+      return <String, dynamic>{
+        for (var i = 0; i < value.length; i++)
+          if (value[i] != null) '$i': _normalize(value[i]),
+      };
+    }
+    return <String, dynamic>{};
+  }
+
+  static Map<String, dynamic>? _asDocument(Object? value) {
+    if (value is Map) return _normalize(value) as Map<String, dynamic>;
+    // An integer-keyed document arrives as a List; keep it addressable.
+    if (value is List) return _children(value);
+    return null;
+  }
+
+  /// Converts the `Map<Object?, Object?>` values the SDK returns — nested ones
+  /// included — into `Map<String, dynamic>`.
+  static Object? _normalize(Object? value) {
+    if (value is Map) {
+      return <String, dynamic>{
+        for (final entry in value.entries)
+          entry.key.toString(): _normalize(entry.value),
+      };
+    }
+    if (value is List) return value.map(_normalize).toList();
+    return value;
   }
 
   @override

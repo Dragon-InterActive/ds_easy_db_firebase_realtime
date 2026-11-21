@@ -99,7 +99,7 @@ void main() async {
 
 ```dart
 // Listen to user changes in real-time
-db.stream.watch('users', 'user123').listen((userData) {
+db.stream!.watch('users', 'user123').listen((userData) {
   if (userData != null) {
     print('User updated: ${userData['name']}');
   } else {
@@ -112,7 +112,7 @@ db.stream.watch('users', 'user123').listen((userData) {
 
 ```dart
 // Listen to all users
-db.stream.watchAll('users').listen((allUsers) {
+db.stream!.watchAll('users').listen((allUsers) {
   if (allUsers != null) {
     print('Total users: ${allUsers.length}');
   }
@@ -123,7 +123,7 @@ db.stream.watchAll('users').listen((allUsers) {
 
 ```dart
 // Watch only online users
-db.stream.watchQuery('users', 
+db.stream!.watchQuery('users', 
   where: {'online': true}
 ).listen((onlineUsers) {
   print('Online users: ${onlineUsers.length}');
@@ -137,20 +137,20 @@ db.stream.watchQuery('users',
 
 ```dart
 // Create or update user
-await db.stream.set('users', 'user123', {
+await db.stream!.set('users', 'user123', {
   'name': 'John Doe',
   'online': true,
   'lastSeen': DatabaseRepository.serverTS, // Uses ServerValue.timestamp
 });
 
 // Update specific fields
-await db.stream.update('users', 'user123', {
+await db.stream!.update('users', 'user123', {
   'online': false,
   'lastSeen': DatabaseRepository.serverTS,
 });
 
 // Delete user
-await db.stream.delete('users', 'user123');
+await db.stream!.delete('users', 'user123');
 ```
 
 ### Real-Time Chat Example
@@ -160,7 +160,7 @@ class ChatScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: db.stream.watchQuery('messages',
+      stream: db.stream!.watchQuery('messages',
         where: {'roomId': 'room123'}
       ),
       builder: (context, snapshot) {
@@ -186,7 +186,7 @@ class ChatScreen extends StatelessWidget {
 
 // Send message
 Future<void> sendMessage(String text) async {
-  await db.stream.set('messages', DateTime.now().millisecondsSinceEpoch.toString(), {
+  await db.stream!.set('messages', DateTime.now().millisecondsSinceEpoch.toString(), {
     'text': text,
     'sender': 'user123',
     'roomId': 'room123',
@@ -199,13 +199,13 @@ Future<void> sendMessage(String text) async {
 
 ```dart
 // Set user online
-await db.stream.set('presence', userId, {
+await db.stream!.set('presence', userId, {
   'online': true,
   'lastSeen': DatabaseRepository.serverTS,
 });
 
 // Watch user presence
-db.stream.watch('presence', userId).listen((presence) {
+db.stream!.watch('presence', userId).listen((presence) {
   if (presence?['online'] == true) {
     print('User is online');
   } else {
@@ -227,7 +227,7 @@ class LiveCounterWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<Map<String, dynamic>?>(
-      stream: db.stream.watch('counters', 'visitors'),
+      stream: db.stream!.watch('counters', 'visitors'),
       builder: (context, snapshot) {
         final count = snapshot.data?['count'] ?? 0;
         
@@ -236,7 +236,7 @@ class LiveCounterWidget extends StatelessWidget {
             Text('Visitors: $count'),
             ElevatedButton(
               onPressed: () async {
-                await db.stream.update('counters', 'visitors', {
+                await db.stream!.update('counters', 'visitors', {
                   'count': count + 1,
                 });
               },
@@ -254,14 +254,14 @@ class LiveCounterWidget extends StatelessWidget {
 
 ```dart
 // Update location
-await db.stream.update('locations', userId, {
+await db.stream!.update('locations', userId, {
   'lat': 52.5200,
   'lng': 13.4050,
   'timestamp': DatabaseRepository.serverTS,
 });
 
 // Watch all locations
-db.stream.watchAll('locations').listen((locations) {
+db.stream!.watchAll('locations').listen((locations) {
   if (locations != null) {
     locations.forEach((userId, location) {
       print('$userId is at: ${location['lat']}, ${location['lng']}');
@@ -303,13 +303,13 @@ Configure Firebase Realtime Database security rules in Firebase Console:
 
 ```dart
 // Users
-await db.stream.set('users', 'user123', {
+await db.stream!.set('users', 'user123', {
   'name': 'John',
   'email': 'john@example.com',
 });
 
 // User posts (separate collection)
-await db.stream.set('posts/user123', 'post1', {
+await db.stream!.set('posts/user123', 'post1', {
   'title': 'Hello World',
   'content': 'My first post',
 });
@@ -319,7 +319,7 @@ await db.stream.set('posts/user123', 'post1', {
 
 ```dart
 // Don't do this!
-await db.stream.set('users', 'user123', {
+await db.stream!.set('users', 'user123', {
   'name': 'John',
   'posts': {
     'post1': {
@@ -341,7 +341,7 @@ Realtime Database automatically caches data:
 FirebaseDatabase.instance.setPersistenceEnabled(true);
 
 // Data is automatically synced when connection is restored
-await db.stream.set('users', 'user123', {
+await db.stream!.set('users', 'user123', {
   'name': 'John',
   'lastUpdated': DatabaseRepository.serverTS,
 });
